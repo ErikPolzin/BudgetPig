@@ -34,9 +34,11 @@ def home(request: HttpRequest, year: int, month: int) -> HttpResponse:
     expenses = Expense.objects \
         .filter(user=request.user, date__month=month, date__year=year) \
         .order_by("-date")
-    expenses_by_category = {}
-    for (cat, catexpenses) in groupby(expenses, key=lambda e: e.category.name):
-        expenses_by_category[cat] = float(sum(e.amount for e in catexpenses).amount)
+    expenses_sorted = sorted(expenses, key=lambda e: e.category.name if e.category else "Unknown")
+    expenses_by_category = []
+    for (cat, catexpenses) in groupby(expenses_sorted, key=lambda e: e.category.name):
+        expenses_by_category.append((cat, float(sum(e.amount for e in catexpenses).amount)))
+    expenses_by_category.sort(key=lambda i: i[1], reverse=True)  # Sort by total amount
     # Calculate percentage of monthly budget reached
     monthly_budget = None
     budgets = MonthlyBudget.objects \
@@ -59,8 +61,8 @@ def home(request: HttpRequest, year: int, month: int) -> HttpResponse:
         "budget_percentage": budget_percentage,
         "budget": monthly_budget,
         "data": json.dumps({
-            "categories": list(expenses_by_category.keys()),
-            "amounts": list(expenses_by_category.values())
+            "categories": [i[0] for i in expenses_by_category],
+            "amounts": [i[1] for i in expenses_by_category]
         }),
         "categories": ExpenseCategory.objects.all(),
         "today": timezone.now().date().isoformat(),
