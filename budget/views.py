@@ -36,7 +36,7 @@ def home(request: HttpRequest, year: int, month: int) -> HttpResponse:
         .order_by("-date")
     expenses_sorted = sorted(expenses, key=lambda e: e.category.name if e.category else "Unknown")
     expenses_by_category = []
-    for (cat, catexpenses) in groupby(expenses_sorted, key=lambda e: e.category.name):
+    for (cat, catexpenses) in groupby(expenses_sorted, key=lambda e: e.categoryName()):
         expenses_by_category.append((cat, float(sum(e.amount for e in catexpenses).amount)))
     expenses_by_category.sort(key=lambda i: i[1], reverse=True)  # Sort by total amount
     # Calculate percentage of monthly budget reached
@@ -66,7 +66,7 @@ def home(request: HttpRequest, year: int, month: int) -> HttpResponse:
         }),
         "categories": ExpenseCategory.objects.all(),
         "today": timezone.now().date().isoformat(),
-        "form": ExpenseForm(),
+        "expense_form": ExpenseForm(),
         "prev_date": prev_date,
         "next_date": next_date,
         "current_date": date(year=year, month=month, day=1),

@@ -28,6 +28,9 @@ class Expense(models.Model):
     def __str__(self) -> str:
         return f"Expense: {self.amount} on {self.date} ({self.description})"
 
+    def categoryName(self) -> str:
+        return self.category.name if self.category else "Unknown"
+
 
 class MonthlyBudget(models.Model):
     """Monthly budget goal."""

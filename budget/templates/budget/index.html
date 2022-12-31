@@ -12,6 +12,8 @@
                     <canvas id="spendchart"></canvas>
                 </div>
             </div>
+            <h3>{{ current_date|date:"F" }}</h3>
+            <p class="text-muted">Total spend: {{ total_spend }} ({{ expenses|length }} logged)</p>
             {% endif %}
             <form action="set-budget" method="post">
                 {% csrf_token %}
@@ -27,7 +29,7 @@
             </div>
             {% endif %}
             {% if expenses %}
-            <table class="table table-hover mt-2">
+            <table class="table table-hover mt-2" style="max-height: 100vh">
                 <caption>{{ current_date|date:"M" }}: {{ total_spend }}</caption>
                 <thead>
                     <tr>
@@ -40,14 +42,31 @@
                 <tbody>
                     {% for ex in expenses %}
                     <tr>
-                        <td>{{ ex.date }}</td>
+                        <td class="text-center">{{ ex.date.day }}</td>
                         <td>{{ ex.description }}</td>
                         <td>{{ ex.amount }}</td>
-                        <td>{{ ex.category.name }}</td>
+                        <td>{{ ex.categoryName }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+            <nav aria-label="Expenses navigation" class="navbar-light bg-light">
+                <ul class="pagination justify-content-center pt-3">
+                  <li class="page-item">
+                    <a class="page-link" href="/{{ prev_date.year }}/{{ prev_date.month }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>                        
+                  </li>
+                  <li class="page-item"><a class="page-link" href="/{{ prev_date.year }}/{{ prev_date.month }}">{{ prev_date|date:"M" }}</a></li>
+                  <li class="page-item active"><a class="page-link" href="#">{{ current_date|date:"M" }}</a></li>
+                  <li class="page-item"><a class="page-link" href="/{{ next_date.year }}/{{ next_date.month }}">{{ next_date|date:"M" }}</a></li>
+                  <li class="page-item">
+                    <a class="page-link" href="/{{ next_date.year }}/{{ next_date.month }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                      </a>                        
+                  </li>
+                </ul>
+            </nav>
             {% else %}
             <div style="height:50vh" class="d-flex justify-content-center align-items-center">
                 <h4>No expenses this month</h4>
@@ -58,32 +77,11 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Log Expense</h5>
-                    <form action="{% url 'budget:add_expense' %}" method="post">
-                        {% csrf_token %}
-                        {{ form|crispy }}
-                        <button type="submit" class="btn btn-success mt-3">Add</button>
-                    </form>
+                    {% crispy expense_form %}
                   </div>
             </div>
         </div>
     </div>
-    <nav aria-label="Expenses navigation" class="fixed-bottom navbar-light bg-light">
-        <ul class="pagination justify-content-center pt-3">
-          <li class="page-item">
-            <a class="page-link" href="/{{ prev_date.year }}/{{ prev_date.month }}" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-            </a>                        
-          </li>
-          <li class="page-item"><a class="page-link" href="/{{ prev_date.year }}/{{ prev_date.month }}">{{ prev_date|date:"M" }}</a></li>
-          <li class="page-item active"><a class="page-link" href="#">{{ current_date|date:"M" }}</a></li>
-          <li class="page-item"><a class="page-link" href="/{{ next_date.year }}/{{ next_date.month }}">{{ next_date|date:"M" }}</a></li>
-          <li class="page-item">
-            <a class="page-link" href="/{{ next_date.year }}/{{ next_date.month }}" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-              </a>                        
-          </li>
-        </ul>
-    </nav>
 </div>
 {% endblock %}
 
