@@ -36,8 +36,10 @@ def home(request: HttpRequest, year: int, month: int) -> HttpResponse:
         .order_by("-date")
     expenses_sorted = sorted(expenses, key=lambda e: e.category.name if e.category else "Unknown")
     expenses_by_category = []
-    for (cat, catexpenses) in groupby(expenses_sorted, key=lambda e: e.categoryName()):
-        expenses_by_category.append((cat, float(sum(e.amount for e in catexpenses).amount)))
+    for (cat, catexpenses) in groupby(expenses_sorted, key=lambda e: e.category):
+        catName = cat.name if cat else "Unknown"
+        catColor = cat.color if cat else "grey"
+        expenses_by_category.append((catName, float(sum(e.amount for e in catexpenses).amount), catColor))
     expenses_by_category.sort(key=lambda i: i[1], reverse=True)  # Sort by total amount
     # Calculate percentage of monthly budget reached
     monthly_budget = None
@@ -62,7 +64,8 @@ def home(request: HttpRequest, year: int, month: int) -> HttpResponse:
         "budget": monthly_budget,
         "data": json.dumps({
             "categories": [i[0] for i in expenses_by_category],
-            "amounts": [i[1] for i in expenses_by_category]
+            "amounts": [i[1] for i in expenses_by_category],
+            "colors": [i[2] for i in expenses_by_category],
         }),
         "categories": ExpenseCategory.objects.all(),
         "today": timezone.now().date().isoformat(),
