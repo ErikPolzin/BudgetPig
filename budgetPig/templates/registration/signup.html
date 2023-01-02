@@ -1,4 +1,4 @@
-<!-- templates/registration/login.html -->
+<!-- templates/registration/signup.html -->
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 {% load static %}
@@ -9,11 +9,11 @@
     <form class="form-signin" method="post">
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title mb-3 text-center">Sign in</h4>
+                <h4 class="card-title mb-3 text-center">Sign up</h4>
                 {% csrf_token %}
                 {{ form|crispy }}
-                <a href="/accounts/signup" class="card-link">Sign up</a>
-                <button class="btn btn-primary mt-2 float-end" type="submit">Sign in</button>
+                <a href="/accounts/login" class="card-link">Sign in</a>
+                <button class="btn btn-primary btn-block mt-2 float-end" type="submit">Sign up</button>
             </div>
         </div>
     </form>

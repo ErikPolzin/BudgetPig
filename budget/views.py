@@ -3,14 +3,14 @@ from itertools import groupby
 import json
 
 from djmoney.money import Money
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from django.utils import timezone
 from django.urls import reverse
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from .models import Expense, ExpenseCategory, MonthlyBudget
-from .forms import ExpenseForm
+from .forms import NewExpenseForm, EditExpenseForm
 
 
 @login_required
@@ -69,7 +69,7 @@ def home(request: HttpRequest, year: int, month: int) -> HttpResponse:
         }),
         "categories": ExpenseCategory.objects.all(),
         "today": timezone.now().date().isoformat(),
-        "expense_form": ExpenseForm(),
+        "expense_form": NewExpenseForm(),
         "prev_date": prev_date,
         "next_date": next_date,
         "current_date": date(year=year, month=month, day=1),
@@ -78,11 +78,30 @@ def home(request: HttpRequest, year: int, month: int) -> HttpResponse:
 
 
 @login_required
-def add_expense(request: HttpRequest) -> HttpResponse:
-    ex = ExpenseForm(request.POST).save(commit=False)
-    ex.user = request.user
-    ex.save()
-    return HttpResponseRedirect(reverse("budget:index"))
+def expenses(request: HttpRequest) -> HttpResponse:
+    """Log new expenses."""
+    if request.method == "POST":
+        ex = NewExpenseForm(request.POST).save(commit=False)
+        ex.user = request.user
+        ex.save()
+        return HttpResponseRedirect(reverse("budget:index"))
+    else:
+        form = NewExpenseForm()
+        return render(request, 'budget/expense.html', {"form": form})
+
+
+@login_required
+def expense(request: HttpRequest, expense_id: int) -> HttpResponse:
+    """View or edit an existing expense."""
+    expense = get_object_or_404(Expense, pk=expense_id)
+    if request.method == "POST":
+        EditExpenseForm(request.POST, instance=expense).save()
+        return HttpResponseRedirect(reverse("budget:index"))
+    else:
+        if expense.user != request.user:
+            return HttpResponse(status=401)
+        form = EditExpenseForm(instance=expense)
+        return render(request, 'budget/expense.html', {"form": form})
 
 
 @login_required

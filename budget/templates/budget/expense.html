@@ -1,0 +1,16 @@
+<!-- templates/registration/login.html -->
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container" style="height: 100%">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Log Expense</h4>
+            <div class="card-text">
+                {% crispy form %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
